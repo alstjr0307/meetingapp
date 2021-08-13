@@ -204,34 +204,71 @@ class _addMeetingState extends State<addMeeting> {
       ),
     );
   }
-  Future meetingPost() async{
-    var shr = await SharedPreferences.getInstance();
-    var owner = shr.getInt("userID");
-    var now = new DateTime.now();
-    now = now.add(Duration(hours: 9));
-    bool kakaotype;
-    if (selectedKakao == '아이디')  kakaotype = true;
-    else kakaotype = false;
-    var body = {
-      "create_dt" :  DateFormat("yyyy-MM-ddTHH:mm:ss").format(now),
-      "type" : selectedType,
-      "location" : selectedLoc,
-      "description" : descont.text,
-      "locdetaio" : loccont.text,
-      "owner" : owner.toString(),
-      "kakao" : kakaocont.text,
-      "kakaotype" : kakaotype.toString(),
-    };
-    var response =  await http.post(Uri.http(
-        "10.0.2.2:8000",  "api/v1/MeetingWrite/", ), body: body
+  void loading() {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(content: CircularProgressIndicator());
+      },
     );
-    print(response.body);
-    if (response.statusCode == 201) {
-      Navigator.pop(context);
-      setState(() {
+  }
+  Future meetingPost() async{
+    showDialog(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('미팅 생성'),
+          content: Text('미팅을 업로드하시겠습니까?'),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('네'),
+              onPressed: () async {
+                Navigator.pop(context, "OK");
+                loading();
+                var shr = await SharedPreferences.getInstance();
+                var owner = shr.getInt("userID");
+                var now = new DateTime.now();
+                now = now.add(Duration(hours: 9));
+                bool kakaotype;
+                if (selectedKakao == '아이디')  kakaotype = true;
+                else kakaotype = false;
+                var body = {
+                  "create_dt" :  DateFormat("yyyy-MM-ddTHH:mm:ss").format(now),
+                  "type" : selectedType,
+                  "location" : selectedLoc,
+                  "description" : descont.text,
+                  "locdetaio" : loccont.text,
+                  "owner" : owner.toString(),
+                  "kakao" : kakaocont.text,
+                  "kakaotype" : kakaotype.toString(),
+                };
+                var response =  await http.post(Uri.http(
+                  "10.0.2.2:8000",  "api/v1/MeetingWrite/", ), body: body
+                );
+                print(response.body);
+                if (response.statusCode == 201) {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                  setState(() {
 
-      });
-    }
+                  });
+                }
+
+
+              },
+            ),
+            FlatButton(
+              child: Text('아니오'),
+              onPressed: () {
+                Navigator.pop(context, "Cancel");
+              },
+            ),
+          ],
+        );
+      },
+    );
 
 
   }

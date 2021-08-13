@@ -89,13 +89,15 @@ class _InputPasswordState extends State<InputPassword> {
           headers: {"Authorization": "Token ${tokenn}"});
       var user = jsonDecode(utf8.decode(userresponse.bodyBytes));
       print(user);
-
+      print(tokenn);
       setState(() {
         _isloading = false;
         sharedPreferences.setString("token", tokenn);
         sharedPreferences.setString("name", user['name'].toString());
         sharedPreferences.setInt('userID', user['id']);
-
+        sharedPreferences.setString('verified', user['verified'].toString());
+        sharedPreferences.setString('school', user['school'].toString());
+        sharedPreferences.setInt('age', user['age']);
         Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (BuildContext context) => HomePage()),
                 (Route<dynamic> route) => false);

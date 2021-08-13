@@ -193,9 +193,7 @@ class _SetIDState extends State<SetID> {
         await http.post(Uri.http("10.0.2.2:8000", "api/v2/users/"), body: body);
     if (responsee.statusCode == 201) {
       //계정 생성 성공
-      var jsonRegist = json.decode(responsee.body);
-
-      var userr = jsonRegist['id'];
+      var user= json.decode(responsee.body);
 
       var responselogin = await http
           .post(Uri.http("10.0.2.2:8000", "api/v2/token/login/"), body: {
@@ -209,7 +207,11 @@ class _SetIDState extends State<SetID> {
       setState(() {
         _isloading = false;
         sharedPreferences.setString("token", token);
-        sharedPreferences.setInt('userID', userr);
+        sharedPreferences.setString("name", user['name'].toString());
+        sharedPreferences.setInt('userID', user['id']);
+        sharedPreferences.setString('verified', user['verified'].toString());
+        sharedPreferences.setString('school', user['school'].toString());
+        sharedPreferences.setInt('age', user['age']);
       });
       Navigator.pushReplacement(
           context,

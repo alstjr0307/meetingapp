@@ -1,4 +1,5 @@
 import 'package:flex_color_scheme/flex_color_scheme.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'dart:async';
@@ -28,6 +29,7 @@ class _MeetingTabState extends State<MeetingTab> {
     sharedPreferences = await SharedPreferences.getInstance();
     token = sharedPreferences.getString('token');
   }
+
   Future<void> _getData() async {
     //새로고침을 위한 것
     setState(() {
@@ -66,6 +68,7 @@ class _MeetingTabState extends State<MeetingTab> {
       child: Container(
         child: RefreshIndicator(
           child: ListView.builder(
+              shrinkWrap: true,
               itemCount: posts.length + 1,
               controller: _sc,
               // Add one more item for progress indicator
@@ -74,166 +77,121 @@ class _MeetingTabState extends State<MeetingTab> {
                 if (index == posts.length) {
                   return _buildProgressIndicator();
                 } else {
-                  return Container(
-
-                    margin: new EdgeInsets.fromLTRB(5, 10, 5, 0),
-                    width: 25.0,
-                    height: 80.0,
-                    child: InkWell(
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                MeetingDetail(index: posts[index]['id']),
+                          ));
+                    },
+                    child: Card(
+                      elevation: 8.0,
+                      margin: new EdgeInsets.symmetric(
+                          horizontal: 5, vertical: 6.0),
                       child: Container(
-                        color: Colors.transparent,
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      MeetingDetail(index: posts[index]['id']),
-                                ));
-                          },
-                          child: Card(
-                            margin: EdgeInsets.symmetric(
-                                vertical: 2, horizontal: 0),
-                            color: Colors.white70,
-                            elevation: 5,
+                        decoration: BoxDecoration(
+                            color: Color.fromRGBO(64, 75, 96, .9)),
+                        child: ListTile(
+                          contentPadding: EdgeInsets.symmetric(
+                              horizontal: 5.0, vertical: 20.0),
+                          leading: Container(
+                            margin: EdgeInsets.fromLTRB(5, 0, 0, 0),
+                            constraints: const BoxConstraints(
+                                minWidth: 10.0, maxWidth: 50),
+                            height: double.infinity,
+                            padding: EdgeInsets.only(right: 12.0),
+                            decoration: new BoxDecoration(
+                                border: new Border(
+                                    right: new BorderSide(
+                                        width: 1.0, color: Colors.white24))),
                             child: Container(
-                              decoration: BoxDecoration(
-                                  color: (posts[index]['partner'] == null
-                                      ? FlexColor.blueDarkPrimaryVariant
-                                      : FlexColor.redDarkPrimary),
-                                  borderRadius: BorderRadius.circular(15)),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                          10, 0, 10, 0),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceAround,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          SizedBox(),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Flexible(
-                                                child: Container(
-                                                  child: Text(
-                                                    (posts[index]['description']),
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: TextStyle(
-                                                      fontWeight: FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              Row(
-                                                children: [
-                                                  CircleAvatar(
-                                                    backgroundColor:
-                                                        Colors.black,
-                                                    child: Text(
-                                                      posts[index]['type'],
-                                                      style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontWeight:
-                                                              FontWeight.bold),
-                                                    ),
-                                                  ),
-                                                  SizedBox(width: 10),
-                                                  CircleAvatar(
-                                                    backgroundColor: Colors.red,
-                                                    child: Text(
-                                                      posts[index]['location'],
-                                                      style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontWeight:
-                                                              FontWeight.bold),
-                                                    ),
-                                                  ),
-                                                ],
-                                              )
-                                            ],
-                                          ),
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius.only(
-                                                topRight: Radius.circular(30.0),
-                                                bottomLeft:
-                                                    Radius.circular(30.0),
-                                              ),
-                                            ),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      14, 2, 14, 2),
-                                              child: Row(
-                                                children: [
-                                                  Expanded(
-                                                    child: Row(
-                                                      children: [
-                                                        Icon(Icons.person,
-                                                            size: 15),
-                                                        Text(
-                                                          (posts[index]
-                                                                  ['writer']
-                                                              .toString()),
-                                                          style: TextStyle(
-                                                              fontSize: 12),
-                                                        ),
-                                                        SizedBox(width: 10),
-                                                        Icon(Icons.school,
-                                                            size: 15),
-                                                        Text(
-                                                          (posts[index]
-                                                                  ['school']
-                                                              .toString()),
-                                                          style: TextStyle(
-                                                              fontSize: 12),
-                                                        ),
-                                                        SizedBox(width: 10),
-                                                        Text(
-                                                          (posts[index]['age']
-                                                                  .toString() +
-                                                              ' 세'),
-                                                          style: TextStyle(
-                                                              fontSize: 12),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  Row(
-                                                    children: [
-                                                      Icon(Icons.timer,
-                                                          size: 12,
-                                                          color: Colors.grey),
-                                                      Text(posts[index]['time'],
-                                                          style: TextStyle(
-                                                              fontSize: 12,
-                                                              color:
-                                                                  Colors.grey)),
-                                                    ],
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                alignment: Alignment.centerLeft,
+                                child: Text(posts[index]['type'].toString(),
+                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                          ),
+                          title: Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: Container(
+
+
+                              child: Text(
+                                (posts[index]['description']),
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
+                          // subtitle: Text("Intermediate", style: TextStyle(color: Colors.white)),
+                          subtitle: Container(
+                            child: Column(
+
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.person, size: 15),
+                                          Text(
+                                              (posts[index]['writer']
+                                                  .toString()),
+                                              style: TextStyle(
+                                                  color: Colors.white)),
+                                          SizedBox(width: 10),
+                                          Icon(Icons.school, size: 15),
+                                          Text(
+                                              (posts[index]['school']
+                                                  .toString()),
+                                              style: TextStyle(
+                                                  color: Colors.white)),
+                                          SizedBox(width: 10),
+                                          Text(
+                                              (posts[index]['age'].toString() +
+                                                  ' 세'),
+                                              style: TextStyle(
+                                                  color: Colors.white)),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(3.0),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.timer,
+                                          size: 12, color: Colors.grey),
+                                      Text(posts[index]['time'],
+                                          style: TextStyle(
+                                              fontSize: 12, color: Colors.grey)),
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                          trailing: Wrap(
+                            spacing: 12,
+                            children: [
+                              if (posts[index]['partner'] == null)
+                                Container(
+                                    child: Text('모집중', style: TextStyle(fontSize: 15,fontFamily: 'Strong', fontWeight: FontWeight.bold, color: Colors.blue),),),
+                              if (posts[index]['partner'] != null)
+                                Container(
+
+
+                                  child: Text('마감', style: TextStyle(fontSize: 15,fontFamily: 'Strong', fontWeight: FontWeight.bold, color: Colors.red),),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
-                      onTap: () {},
                     ),
                   );
                 }
@@ -248,29 +206,34 @@ class _MeetingTabState extends State<MeetingTab> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.transparent,
+          backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
           iconTheme: IconThemeData(color: Colors.black, size: 40),
           title: Text(
             '미팅 목록',
             style: TextStyle(
-              color: Colors.black,
+              color: Colors.white,
             ),
           ),
-          foregroundColor: Colors.transparent,
+          foregroundColor: Color.fromRGBO(58, 66, 86, 1.0),
           actions: [
             if (token != null)
-            IconButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => addMeeting(),
-                      ));
-                },
-                icon: Icon(Icons.add, color: Colors.black,)),
+              IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => addMeeting(),
+                        ));
+                  },
+                  icon: Icon(
+                    Icons.add,
+                    color: Colors.black,
+                  )),
           ],
         ),
-        body: Column(children: [_buildList()]));
+        body: Container(
+            color: Color.fromRGBO(58, 66, 86, 1.0),
+            child: Column(children: [_buildList()])));
   }
 
   void _getMoreData(int index) async {

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:kakao_flutter_sdk/all.dart';
@@ -13,42 +15,77 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
-  var sharedPreferences;
-  checkLoginStatus() async {
-    sharedPreferences = await SharedPreferences.getInstance();
-    if (sharedPreferences.getString("token") != null) {
-      username = sharedPreferences.getString("name");
-    }
-
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    checkLoginStatus();
-    _initKakaoTalkInstalled();
-  }
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      drawer: CustomDrawer(),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Title(),
-          Meeting(),
-          MyMeeting(),
-        ],
-      ),
-
-    );
-  }
-
+  var scaffoldKey = GlobalKey<ScaffoldState>();
   var username;
   bool _isLoading = false;
   String msg = '.';
   bool _isKakaoTalkInstalled = false;
+
+  var sharedPreferences;
+  var userid;
+  var userschool;
+  var verified;
+
+  checkLoginStatus() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    if (sharedPreferences.getString("token") != null) {
+      username = sharedPreferences.getString("name");
+      userid = sharedPreferences.getInt("userID");
+      userschool = sharedPreferences.getString("school");
+      verified = sharedPreferences.getString("verified");
+      print(verified);
+    }
+  }
+
+  @override
+  void initState() {
+    checkLoginStatus();
+
+    super.initState();
+
+    _initKakaoTalkInstalled();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        key: scaffoldKey,
+        drawer: CustomDrawer(),
+        body: Stack(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage("assets/images/Wallpaper.jpg"),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: BackdropFilter(
+                filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Title(),
+                    Meeting(),
+                    MyMeeting(),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              left: 5,
+              top: 50,
+              child: IconButton(
+                icon: Icon(
+                  Icons.person,
+                  color: Colors.white,
+                ),
+                onPressed: () => scaffoldKey.currentState!.openDrawer(),
+              ),
+            ),
+          ],
+        ));
+  }
 
   _initKakaoTalkInstalled() async {
     final installed = await isKakaoTalkInstalled();
@@ -58,6 +95,7 @@ class _HomePageState extends State<HomePage> {
       _isKakaoTalkInstalled = installed;
     });
   }
+
   _issueAccessToken(String authCode) async {
     try {
       print('1212');
@@ -89,27 +127,34 @@ class _HomePageState extends State<HomePage> {
     print('1');
     try {
       var code = await AuthCodeClient.instance.requestWithTalk();
-      print('코드'+code);
+      print('코드' + code);
       await _issueAccessToken(code);
     } catch (e) {
-      print('실패'+e.toString());
+      print('실패' + e.toString());
     }
   }
 
-
-
-  Widget Title () {
+  Widget Title() {
     return Container(
-      child: Center(child: Text('미팅대학교')),
+      child: Center(
+          child: Text(
+        '미팅대학교',
+        style: TextStyle(
+            fontFamily: 'Euljiro',
+            fontSize: 60,
+            fontWeight: FontWeight.bold,
+            color: Colors.pink),
+      )),
     );
   }
+
   Widget Meeting() {
     return Container(
         height: 100,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Card(
-            color: Color.fromARGB(255, 187, 222, 251),
+            color: Color.fromARGB(150, 255, 158, 188),
             child: InkWell(
               onTap: () {
                 Navigator.push(
@@ -158,15 +203,41 @@ class _HomePageState extends State<HomePage> {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Card(
-            color: Color.fromARGB(255, 187, 222, 251),
+            color: Color.fromARGB(150, 255, 158, 188),
             child: InkWell(
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MyMeetingList(),
-                  ),
-                );
+                if (userid != null)
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MyMeetingList(),
+                    ),
+                  );
+                if (userid == null)
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('로그인 해야 이용 가능합니다'),
+                        content: Container(
+                          padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
+                          child: Text('로그인하시겠습니까? '),
+                        ),
+                        actions: [
+                          TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                if (_isKakaoTalkInstalled)
+                                  _loginWithTalk();
+                                else
+                                  _loginWithKakao();
+                              },
+                              child: Text('예'))
+                        ],
+                      );
+                    },
+                  );
               },
               child: Row(
                 children: [
@@ -201,7 +272,6 @@ class _HomePageState extends State<HomePage> {
         ));
   }
 
-
   Widget CustomDrawer() {
     return Drawer(
       // 리스트뷰 추가
@@ -210,10 +280,11 @@ class _HomePageState extends State<HomePage> {
         children: <Widget>[
           // 드로워해더 추가
           Container(
-            height: 300,
+            height: 600,
             child: DrawerHeader(
               child: Center(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     if (username == null)
@@ -228,9 +299,10 @@ class _HomePageState extends State<HomePage> {
                         ],
                       )
                     else
-                      Row(
+                      Column(
                         children: [
                           Container(
+                            alignment: Alignment.centerLeft,
                             child: Text(
                               username,
                               style: TextStyle(
@@ -240,8 +312,21 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           SizedBox(
-                            width: 10,
+                            height: 10,
                           ),
+                          Row(
+                            children: [
+                              Icon(Icons.school),
+                              Text(userschool),
+                            ],
+                          ),
+                          if (verified == 'false')
+                            Row(
+                              children: [
+                                Icon(Icons.warning),
+                                Text('인증되지 않은 사용자입니다'),
+                              ],
+                            )
                         ],
                       ),
 
@@ -257,7 +342,7 @@ class _HomePageState extends State<HomePage> {
                             shape: BoxShape.rectangle,
                             border: Border.all(width: 1.0, color: Colors.white),
                             borderRadius:
-                            BorderRadius.all(Radius.circular(30.0)),
+                                BorderRadius.all(Radius.circular(30.0)),
                           ),
                           child: Align(
                             alignment: Alignment.bottomCenter,
@@ -277,70 +362,115 @@ class _HomePageState extends State<HomePage> {
                             _loginWithTalk();
                           else
                             _loginWithKakao();
-
                         },
                       ),
 
                     if (username != null)
-                      TextButton(
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          minimumSize: Size(50, 30),
-                          alignment: Alignment.centerLeft,
-                        ),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (BuildContext context) {
-                              return Dialog(
-
-                                child: Container(
-                                  padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
-                                  child: new Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      new CircularProgressIndicator(),
-                                      SizedBox(width: 20,),
-                                      new Text("로그아웃중"),
-                                    ],
+                      Column(
+                        children: [
+                          if (verified == 'false')
+                            TextButton(
+                              child: Container(
+                                padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
+                                margin: EdgeInsets.all(0),
+                                decoration: BoxDecoration(
+                                  color: FlexColor.darkBackground,
+                                  shape: BoxShape.rectangle,
+                                  border:
+                                  Border.all(width: 1.0, color: Colors.white),
+                                  borderRadius:
+                                  BorderRadius.all(Radius.circular(20.0)),
+                                ),
+                                child: Align(
+                                  alignment: Alignment.bottomCenter,
+                                  child: Text(
+                                    "학생증 인증하기",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
                                   ),
                                 ),
+                              ),
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: Size(50, 30),
+                                alignment: Alignment.centerLeft,
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => Card(),
+                                  ),
+                                );
+                              },
+                            ),
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              minimumSize: Size(50, 30),
+                              alignment: Alignment.centerLeft,
+                            ),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (BuildContext context) {
+                                  return Dialog(
+                                    child: Container(
+                                      padding:
+                                          EdgeInsets.fromLTRB(10, 20, 10, 20),
+                                      child: new Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          new CircularProgressIndicator(),
+                                          SizedBox(
+                                            width: 20,
+                                          ),
+                                          new Text("로그아웃중"),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
                               );
-                            },
-                          );
-                          sharedPreferences.clear();
-                          sharedPreferences.commit();
-                          username = null;
+                              sharedPreferences.clear();
+                              sharedPreferences.commit();
+                              username = null;
 
-                          new Future.delayed(new Duration(seconds: 1), () {
-                            //pop dialog
-                            setState(() {});
-                            Navigator.pop(context);
-                          });
-                        },
-                        child: Container(
-                          padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-                          margin: EdgeInsets.all(0),
-                          decoration: BoxDecoration(
-                            color: FlexColor.redLightPrimary,
-                            shape: BoxShape.rectangle,
-                            border: Border.all(width: 1.0, color: Colors.white),
-                            borderRadius:
-                            BorderRadius.all(Radius.circular(20.0)),
-                          ),
-                          child: Align(
-                            alignment: Alignment.bottomCenter,
-                            child: Text(
-                              "로그아웃",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
+                              new Future.delayed(new Duration(seconds: 1), () {
+                                //pop dialog
+                                setState(() {});
+                                Navigator.pop(context);
+                              });
+                            },
+                            child: Container(
+                              padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
+                              margin: EdgeInsets.all(0),
+                              decoration: BoxDecoration(
+                                color: FlexColor.redLightPrimary,
+                                shape: BoxShape.rectangle,
+                                border:
+                                    Border.all(width: 1.0, color: Colors.white),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(20.0)),
+                              ),
+                              child: Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Text(
+                                  "로그아웃",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
                     //프로필 가기
                   ],
@@ -350,10 +480,8 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           // 리스트타일 추가
-
         ],
       ),
     );
   }
 }
-
