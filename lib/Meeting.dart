@@ -35,6 +35,7 @@ class _MeetingTabState extends State<MeetingTab> {
     setState(() {
       page = 0;
       posts = [];
+      print(page);
       _getMoreData(page);
     });
   }
@@ -92,7 +93,7 @@ class _MeetingTabState extends State<MeetingTab> {
                           horizontal: 5, vertical: 6.0),
                       child: Container(
                         decoration: BoxDecoration(
-                            color: Color.fromRGBO(64, 75, 96, .9)),
+                            color: Color.fromRGBO(126, 33, 44,1.0)),
                         child: ListTile(
                           contentPadding: EdgeInsets.symmetric(
                               horizontal: 5.0, vertical: 20.0),
@@ -206,12 +207,11 @@ class _MeetingTabState extends State<MeetingTab> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
+          backgroundColor: Color.fromRGBO( 254, 213, 217,1.0),
           iconTheme: IconThemeData(color: Colors.black, size: 40),
           title: Text(
             '미팅 목록',
-            style: TextStyle(
-              color: Colors.white,
+            style: TextStyle(fontWeight: FontWeight.bold
             ),
           ),
           foregroundColor: Color.fromRGBO(58, 66, 86, 1.0),
@@ -232,7 +232,7 @@ class _MeetingTabState extends State<MeetingTab> {
           ],
         ),
         body: Container(
-            color: Color.fromRGBO(58, 66, 86, 1.0),
+            color: Color.fromRGBO( 254, 213, 217,1.0),
             child: Column(children: [_buildList()])));
   }
 
@@ -247,10 +247,11 @@ class _MeetingTabState extends State<MeetingTab> {
 
       var url =
           "http://10.0.2.2:8000/api/v1/Meeting/?page=" + (index + 1).toString();
-
+      print(page);
       final response = await dio.get(url);
+      print('11');
       maxpage = (response.data['count'] - 1) ~/ 10 + 1;
-
+      print(response.statusCode);
       tList = [];
 
       for (int i = 0; i < response.data['results'].length; i++) {

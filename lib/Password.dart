@@ -46,8 +46,13 @@ class _InputPasswordState extends State<InputPassword> {
       );
     } else
       return Scaffold(
-        body: ListView(
+        appBar: AppBar(
+          title: Text('로그인'),
+        ),
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+
             Container(
               padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
               child: TextField(

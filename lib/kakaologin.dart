@@ -53,8 +53,10 @@ class _LoginResultState extends State {
       Uri.http(
           "10.0.2.2:8000",  "api/v1/User", {"username": "$_userid"}),
     );
-
+    print(response.body);
+    print('진행중');
     if (response.body == '[]') {
+      print('신규');
       Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -63,6 +65,7 @@ class _LoginResultState extends State {
 
       
     } else { //이미 가입됐을때
+      print('이미 가입');
       Navigator.pushReplacement(context, MaterialPageRoute(
         builder: (context) => InputPassword(userID: _userid),
       ));

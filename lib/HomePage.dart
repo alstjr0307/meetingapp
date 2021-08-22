@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:kakao_flutter_sdk/all.dart';
+import 'package:meetingapp/StudentCard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'Meeting.dart';
@@ -402,7 +403,7 @@ class _HomePageState extends State<HomePage> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => Card(),
+                                    builder: (context) => CardSelect(),
                                   ),
                                 );
                               },

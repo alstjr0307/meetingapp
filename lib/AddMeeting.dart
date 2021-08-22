@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
 import 'package:http/http.dart' as http;
-import 'package:meetingapp/Meeting.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_dropdown_alert/alert_controller.dart';
+import 'package:flutter_dropdown_alert/model/data_alert.dart';
 import 'dart:async';
-import 'package:flutter/foundation.dart';
+
 class addMeeting extends StatefulWidget {
   @override
   _addMeetingState createState() => _addMeetingState();
@@ -67,12 +69,11 @@ class _addMeetingState extends State<addMeeting> {
               children: [
                 Center(
                   child: Text(
-                    '미팅 등록을 위해 간단한 내용을 작성해주세요!',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    '미팅 등록을 위해\n아래 내용을 작성해주세요!',
+                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, fontFamily: 'Strong'),
                   ),
                 ),
-                SizedBox(height: 20),
-                Center(child: Text('아래 입력란을 완성해주세요')),
+
                 SizedBox(height:30),
                 Row(
                   children: [
@@ -188,12 +189,13 @@ class _addMeetingState extends State<addMeeting> {
                   padding: const EdgeInsets.all(8.0),
                   child: TextButton(
                     style: TextButton.styleFrom(
-                      backgroundColor: Colors.yellow,
+                      backgroundColor: Colors.red.withOpacity(0.2),
                       // foreground
                     ),
-                    child: Text('완료'),
+                    child: Text('완료',),
                     onPressed: () {
-                      meetingPost();
+                      if (kakaocont.text != '' && descont.text !='' ) meetingPost();
+                      else AlertController.show("업로드 실패", "입력하지 않은 항목이 있어요", TypeAlert.warning, );
                     },
                   ),
                 ),
